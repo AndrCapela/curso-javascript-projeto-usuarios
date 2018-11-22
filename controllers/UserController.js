@@ -149,7 +149,6 @@ class UserController {
     selectAll() {
 
         let users = this.getUsersStorage();
-        console.log(users);
         users.forEach(dataUser => {
 
             let user = new User();
@@ -204,6 +203,9 @@ class UserController {
 
         tr.querySelector(".btn-delete").addEventListener("click", e => {
             if (confirm("Deseja realmente excluir?")) {
+                let user = new User();
+                user.loadFromJSON(JSON.parse(tr.dataset.user));
+                user.remove();
                 tr.remove();
                 this.updateCount();
             }
@@ -235,8 +237,6 @@ class UserController {
                     field.value = json[name];
                 }
             }
-            
-            console.log(json._photo)
             this.formUpdateEl.querySelector(".photo").src = json._photo;
             this.showPanelUpdate();
         });
