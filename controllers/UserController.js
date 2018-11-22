@@ -183,6 +183,13 @@ class UserController {
         //document.getElementById("number-users").innerHTML = eval(parseInt(document.getElementById("number-users").innerHTML) + 1);
     }
     addEventsTR(tr) {
+
+        tr.querySelector(".btn-delete").addEventListener(click, e => {
+            if (confirm("Deseja realmente excluir?")) {
+                tr.remove();
+            }
+        });
+
         tr.querySelector(".btn-edit").addEventListener("click", e => {
             let json = JSON.parse(tr.dataset.user);
             this.formUpdateEl.dataset.trIndex = tr.sectionRowIndex;
