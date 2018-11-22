@@ -28,25 +28,15 @@ class UserController {
                         result._photo = userOld._photo;
                     }
                     else {
-                        values.photo = content;
+                        result.photo = content;
                     }
+                    let user = new User();
+                    user.loadFromJSON(result);
 
-                    tr.dataset.user = JSON.stringify(result);
+                    user.save();
 
-                    tr.innerHTML = `
-                    <td>
-                        <img src="${result._photo}" alt="User Image" class="img-circle img-sm">
-                    </td>
-                    <td>${result._name}</td>
-                    <td>${result._email}</td>
-                    <td>${result._admin ? "Sim" : "Não"}</td>
-                    <td>${result._register.toLocaleString()}</td>
-                    <td>
-                        <button type="button" class="btn btn-edit btn-primary btn-xs btn-flat">Editar</button>
-                        <button type="button" class="btn btn-delete btn-danger btn-xs btn-flat">Excluir</button>
-                    </td>
-                `;
-                    this.addEventsTR(tr);
+                    tr = this.getTr(user, tr);
+
                     this.updateCount();
                     this.showPanelCreate();
                     this.formUpdateEl.reset();
@@ -80,7 +70,7 @@ class UserController {
             this.getphoto(this.formEl).then(
                 (content) => {
                     values.photo = content;
-                    this.insert(values);
+                    values.save();
                     this.addLine(values);
                     this.formEl.reset();
                     btn.disabled = false;
@@ -125,7 +115,7 @@ class UserController {
         return new Promise((resolve, reject) => {
             let fileReader = new FileReader();
 
-            let elements = [...this.formEl.elements].filter(item => {
+            let elements = [...formEl.elements].filter(item => {
                 if (item.name === "photo") {
                     return item;
                 }
@@ -148,8 +138,10 @@ class UserController {
 
     getUsersStorage() {
         let users = [];
-        if (sessionStorage.getItem("users")) {
-            users = JSON.parse(sessionStorage.getItem("users"));
+        //if (sessionStorage.getItem("users")) {
+        if (localStorage.getItem("users")) {
+            users = JSON.parse(localStorage.getItem("users"));
+            //users = JSON.parse(sessionStorage.getItem("users"));
         }
         return users;
     }
@@ -168,18 +160,8 @@ class UserController {
         });
     }
 
-    insert(data) {
-        let users = this.getUsersStorage();
-        users.push(data);
-        sessionStorage.setItem("users", JSON.stringify(users));
-    }
-
-    addLine(dataUser) {
-
-        let tr = document.createElement('tr');
-
-        tr.dataset.user = JSON.stringify(dataUser);
-
+    getTr(dataUser, tr = null) {
+        if (tr === null) tr = document.createElement("tr");
         tr.innerHTML = `
         <td>
             <img src="${dataUser.photo}" alt="User Image" class="img-circle img-sm">
@@ -191,10 +173,16 @@ class UserController {
         <td>
             <button type="button" class="btn btn-edit btn-primary btn-xs btn-flat">Editar</button>
             <button type="button" class="btn btn-danger btn-delete btn-xs btn-flat">Excluir</button>
-        </td>
-    `;
+        </td>`;
 
         this.addEventsTR(tr);
+        tr.dataset.user = JSON.stringify(dataUser);
+        return tr;
+    }
+
+    addLine(dataUser) {
+
+        let tr = this.getTr(dataUser);
 
         this.tableEl.appendChild(tr);
 
@@ -247,7 +235,9 @@ class UserController {
                     field.value = json[name];
                 }
             }
-            this.formUpdateEl.querySelector("photo").src = json._photo;
+            
+            console.log(json._photo)
+            this.formUpdateEl.querySelector(".photo").src = json._photo;
             this.showPanelUpdate();
         });
     }
